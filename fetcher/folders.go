@@ -7,8 +7,18 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/pmenglund/gcp-folders/tree"
-	"golang.org/x/oauth2/google"
-	crm "google.golang.org/api/cloudresourcemanager/v2beta1"
+
+	// crm "google.golang.org/api/cloudresourcemanager/v2beta1"
+	crm "google.golang.org/api/cloudresourcemanager/v3"
+	"google.golang.org/api/option"
+)
+
+const (
+	// See, edit, configure, and delete your Google Cloud Platform data
+	CloudPlatformScope = "https://www.googleapis.com/auth/cloud-platform"
+
+	// View your data across Google Cloud Platform services
+	CloudPlatformReadOnlyScope = "https://www.googleapis.com/auth/cloud-platform.read-only"
 )
 
 type Config struct {
@@ -24,12 +34,12 @@ type Fetcher struct {
 }
 
 func New(ctx context.Context, conf Config) (*Fetcher, error) {
-	client, err := google.DefaultClient(ctx, crm.CloudPlatformReadOnlyScope)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get default client")
-	}
+	// client, err := google.DefaultClient(ctx, crm.CloudPlatformReadOnlyScope)
+	// if err != nil {
+	// 	return nil, errors.Wrap(err, "failed to get default client")
+	// }
 
-	crmSvc, err := crm.New(client)
+	crmSvc, err := crm.NewService(ctx, option.WithScopes(crm.CloudPlatformReadOnlyScope))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create cloud resource manager client")
 	}
