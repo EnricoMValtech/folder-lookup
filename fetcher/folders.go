@@ -10,7 +10,6 @@ import (
 
 	// crm "google.golang.org/api/cloudresourcemanager/v2beta1"
 	crm "google.golang.org/api/cloudresourcemanager/v3"
-	"google.golang.org/api/option"
 )
 
 const (
@@ -39,7 +38,7 @@ func New(ctx context.Context, conf Config) (*Fetcher, error) {
 	// 	return nil, errors.Wrap(err, "failed to get default client")
 	// }
 
-	crmSvc, err := crm.NewService(ctx, option.WithScopes(crm.CloudPlatformReadOnlyScope))
+	crmSvc, err := crm.NewService(ctx) //, option.WithScopes(crm.CloudPlatformReadOnlyScope))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create cloud resource manager client")
 	}
