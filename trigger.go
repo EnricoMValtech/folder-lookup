@@ -116,10 +116,11 @@ func Dump(ctx context.Context, msg Message) error {
 	// Publish "hello world" on topic1.
 	topic := client.Topic(t)
 
-	log.Printf("TOPIC is %s", t)
 	res := topic.Publish(ctx, &pubsub.Message{
 		Data: []byte("Folder lookup function was succesfull. Calling scheduled query"),
 	})
+	log.Printf("TOPIC is published")
+
 	// The publish happens asynchronously.
 	// Later, you can get the result from res:
 	msgID, err := res.Get(ctx)
