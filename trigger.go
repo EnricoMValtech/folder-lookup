@@ -103,7 +103,7 @@ func Dump(ctx context.Context, msg Message) error {
 	if pid == "" {
 		return errors.New("PROJECTID environment variable required")
 	}
-	client, err := pubsub.NewClient(ctx, pid)
+	client, err := pubsub.NewClient(ctx, project, option.WithCredentials(creds))
 	if err != nil {
 		return err
 	}
