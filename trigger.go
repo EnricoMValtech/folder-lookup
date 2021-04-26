@@ -115,6 +115,8 @@ func Dump(ctx context.Context, msg Message) error {
 	log.Printf("TOPIC is %s", t)
 	// Publish "hello world" on topic1.
 	topic := client.Topic(t)
+
+	log.Printf("TOPIC is %s", t)
 	res := topic.Publish(ctx, &pubsub.Message{
 		Data: []byte("Folder lookup function was succesfull. Calling scheduled query"),
 	})
