@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"cloud.google.com/go/bigquery"
+	"cloud.google.com/go/pubsub"
 	"github.com/pmenglund/gcp-folders/fetcher"
 	"github.com/pmenglund/gcp-folders/saver"
 	"github.com/pmenglund/gcp-folders/tree"
@@ -30,6 +31,7 @@ type Message struct {
 // DATASET
 // TABLE
 // PROJECT
+// TOPIC
 func Dump(ctx context.Context, msg Message) error {
 	id := os.Getenv("ROOT")
 	if id == "" {
@@ -96,5 +98,29 @@ func Dump(ctx context.Context, msg Message) error {
 		return err
 	}
 
+	// publish a message to a pub/sub topic that will trigger another cloud function
+
+	client, err := pubsub.NewClient(ctx, "project-id")
+	if err != nil {
+		return err
+	}
+
+	t := os.Getenv("TOPIC")
+	if t == "" {
+		return errors.New("TOPIC environment variable required")
+	}
+	log.Printf("TOPIC is %s", t)
+	// Publish "hello world" on topic1.
+	topic := client.Topic(t)
+	res := topic.Publish(ctx, &pubsub.Message{
+		Data: []byte("Folder lookup function was succesfull. Calling scheduled query"),
+	})
+	// The publish happens asynchronously.
+	// Later, you can get the result from res:
+	msgID, err := res.Get(ctx)
+	if err != nil {
+		return err
+	}
+	log.Printf("msgID is %s", msgID)
 	return nil
 }

@@ -20,6 +20,8 @@ There are five environment variables
   name of the BigQuery table in the above dataset where to save the folder names, defaults to `folders`
 - `PROJECT`  
   name of the project where to run the BigQuery jobs that inserts/updates/deletes the table
+- `TOPIC`  
+  name of the topic that the function will call once is done.
 
 ## Required Setup
 
