@@ -113,7 +113,6 @@ func Dump(ctx context.Context, msg Message) error {
 		return errors.New("TOPIC environment variable required")
 	}
 	log.Printf("TOPIC is %s", t)
-	// Publish "hello world" on topic1.
 	topic := client.Topic(t)
 
 	res := topic.Publish(ctx, &pubsub.Message{
