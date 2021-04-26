@@ -99,8 +99,11 @@ func Dump(ctx context.Context, msg Message) error {
 	}
 
 	// publish a message to a pub/sub topic that will trigger another cloud function
-
-	client, err := pubsub.NewClient(ctx, "project-id")
+	pid := os.Getenv("PROJECTID")
+	if pid == "" {
+		return errors.New("PROJECTID environment variable required")
+	}
+	client, err := pubsub.NewClient(ctx, pid)
 	if err != nil {
 		return err
 	}
