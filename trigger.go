@@ -99,7 +99,9 @@ func Dump(ctx context.Context, msg Message) error {
 	}
 
 	// publish a message to a pub/sub topic that will trigger another cloud function
-	client, err := pubsub.NewClient(ctx, project, option.WithCredentials(creds))
+	// client, err := pubsub.NewClient(ctx, project, option.WithCredentials(creds))
+	ctxpubsub := context.Background()
+	client, err := pubsub.NewClient(ctxpubsub, project)
 	if err != nil {
 		return err
 	}
@@ -111,14 +113,14 @@ func Dump(ctx context.Context, msg Message) error {
 	log.Printf("TOPIC is %s", t)
 	topic := client.Topic(t)
 
-	res := topic.Publish(ctx, &pubsub.Message{
+	res := topic.Publish(ctxpubsub, &pubsub.Message{
 		Data: []byte("Folder lookup function was succesfull. Calling scheduled query"),
 	})
 	log.Printf("TOPIC is published")
 
 	// The publish happens asynchronously.
 	// Later, you can get the result from res:
-	msgID, err := res.Get(ctx)
+	msgID, err := res.Get(ctxpubsub)
 	if err != nil {
 		return err
 	}
