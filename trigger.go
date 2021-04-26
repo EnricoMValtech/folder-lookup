@@ -126,5 +126,9 @@ func Dump(ctx context.Context, msg Message) error {
 		return err
 	}
 	log.Printf("msgID is %s", msgID)
+
+	client.Close()
+
+	log.Printf("Topic has been closed")
 	return nil
 }
