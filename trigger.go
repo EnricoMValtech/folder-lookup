@@ -101,6 +101,7 @@ func Dump(ctx context.Context, msg Message) error {
 	// publish a message to a pub/sub topic that will trigger another cloud function
 	// client, err := pubsub.NewClient(ctx, project, option.WithCredentials(creds))
 	ctxpubsub := context.Background()
+	log.Printf("ctxpubsub")
 	client, err := pubsub.NewClient(ctxpubsub, project)
 	if err != nil {
 		return err
