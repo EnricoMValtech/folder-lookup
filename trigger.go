@@ -7,14 +7,17 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"cloud.google.com/go/bigquery"
+	datatransfer "cloud.google.com/go/bigquery/datatransfer/apiv1"
 	"github.com/pmenglund/gcp-folders/fetcher"
 	"github.com/pmenglund/gcp-folders/saver"
 	"github.com/pmenglund/gcp-folders/tree"
 	"golang.org/x/oauth2/google"
-	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"
+	datatransferpb "google.golang.org/genproto/googleapis/cloud/bigquery/datatransfer/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Message is the message sent to the cloud function
@@ -98,31 +101,39 @@ func Dump(ctx context.Context, msg Message) error {
 		return err
 	}
 
-	u := os.Getenv("CLOUDFUNCTIONURL")
+	// u := os.Getenv("CLOUDFUNCTIONURL")
 
-	err = makeGetRequest(u)
+	err = StartManualTransfer(project)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func makeGetRequest(targetURL string) error {
-	// functionURL := "https://TARGET_URL"
+func StartManualTransfer(projectId string) error {
+
+	// client = bigquery_datatransfer_v1.DataTransferServiceClient()
+	// start_time = bigquery_datatransfer_v1.types.Timestamp(seconds=int(time.time() + 10))
+	// response = client.start_manual_transfer_runs(scheduledQuery, requested_run_time=start_time)
 	ctx := context.Background()
 
-	// client is a http.Client that automatically adds an "Authorization" header
-	// to any requests made.
-	client, err := idtoken.NewClient(ctx, targetURL)
+	// Creates a client.
+	client, err := datatransfer.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("idtoken.NewClient: %v", err)
+		return err
 	}
-	log.Printf("Making http request")
-	resp, err := client.Get(targetURL)
+	ts := timestamppb.New(time.Now())
+	// *StartManualTransferRunsRequest_RequestedRunTime
+	tmp := datatransferpb.StartManualTransferRunsRequest_RequestedRunTime{RequestedRunTime: ts}
+
+	req := &datatransferpb.StartManualTransferRunsRequest{
+		Parent: "projects/global-it-310709/locations/europe-west4/transferConfigs/60777236-0000-234a-ad77-f4030436fb10",
+		Time:   &tmp,
+	}
+	resp, err := client.StartManualTransferRuns(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.Get: %v", err)
+		return err
 	}
-	defer resp.Body.Close()
-	log.Printf("Http request Done")
+
 	return nil
 }
