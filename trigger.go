@@ -115,9 +115,6 @@ func Dump(ctx context.Context, msg Message) error {
 }
 
 func StartManualTransfer(parent string, ctx context.Context, creds *google.Credentials) error {
-
-	// ctx := context.Background()
-
 	// Creates a client.
 	client, err := datatransfer.NewClient(ctx, option.WithCredentials(creds))
 	if err != nil {
