@@ -9,11 +9,11 @@ import (
 	"strconv"
 
 	"cloud.google.com/go/bigquery"
-	"cloud.google.com/go/pubsub"
 	"github.com/pmenglund/gcp-folders/fetcher"
 	"github.com/pmenglund/gcp-folders/saver"
 	"github.com/pmenglund/gcp-folders/tree"
 	"golang.org/x/oauth2/google"
+	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"
 )
 
@@ -98,33 +98,31 @@ func Dump(ctx context.Context, msg Message) error {
 		return err
 	}
 
-	// publish a message to a pub/sub topic that will trigger another cloud function
-	ctxpubsub := context.Background()
-	client, err := pubsub.NewClient(ctxpubsub, project)
+	u := os.Getenv("CLOUDFUNCTIONURL")
+
+	err = makeGetRequest(u)
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	t := os.Getenv("TOPIC")
-	if t == "" {
-		return errors.New("TOPIC environment variable required")
-	}
-	log.Printf("TOPIC is %s", t)
-	topic := client.Topic(t)
+func makeGetRequest(targetURL string) error {
+	// functionURL := "https://TARGET_URL"
+	ctx := context.Background()
 
-	res := topic.Publish(ctxpubsub, &pubsub.Message{
-		Data: []byte("Folder lookup function was succesfull. Calling scheduled query"),
-	})
-	log.Printf("TOPIC is published")
-
-	msgID, err := res.Get(ctxpubsub)
+	// client is a http.Client that automatically adds an "Authorization" header
+	// to any requests made.
+	client, err := idtoken.NewClient(ctx, targetURL)
 	if err != nil {
-		return err
+		return fmt.Errorf("idtoken.NewClient: %v", err)
 	}
-	log.Printf("msgID is %s", msgID)
-
-	client.Close()
-
-	log.Printf("Topic has been closed")
+	log.Printf("Making http request")
+	resp, err := client.Get(targetURL)
+	if err != nil {
+		return fmt.Errorf("client.Get: %v", err)
+	}
+	defer resp.Body.Close()
+	log.Printf("Http request Done")
 	return nil
 }
