@@ -34,7 +34,7 @@ type Message struct {
 // DATASET
 // TABLE
 // PROJECT
-// TOPIC
+// PARENT
 func Dump(ctx context.Context, msg Message) error {
 	id := os.Getenv("ROOT")
 	if id == "" {
@@ -101,33 +101,33 @@ func Dump(ctx context.Context, msg Message) error {
 		return err
 	}
 
-	// u := os.Getenv("CLOUDFUNCTIONURL")
+	parent := os.Getenv("PARENT")
+	if parent == "" {
+		return errors.New("PARENT environment variable required")
+	}
+	log.Printf("PARENT is %s", parent)
 
-	err = StartManualTransfer(project)
+	err = StartManualTransfer(parent, ctx, creds)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func StartManualTransfer(projectId string) error {
+func StartManualTransfer(parent string, ctx context.Context, creds *google.Credentials) error {
 
-	// client = bigquery_datatransfer_v1.DataTransferServiceClient()
-	// start_time = bigquery_datatransfer_v1.types.Timestamp(seconds=int(time.time() + 10))
-	// response = client.start_manual_transfer_runs(scheduledQuery, requested_run_time=start_time)
-	ctx := context.Background()
+	// ctx := context.Background()
 
 	// Creates a client.
-	client, err := datatransfer.NewClient(ctx)
+	client, err := datatransfer.NewClient(ctx, option.WithCredentials(creds))
 	if err != nil {
 		return err
 	}
 	ts := timestamppb.New(time.Now())
-	// *StartManualTransferRunsRequest_RequestedRunTime
 	tmp := datatransferpb.StartManualTransferRunsRequest_RequestedRunTime{RequestedRunTime: ts}
 
 	req := &datatransferpb.StartManualTransferRunsRequest{
-		Parent: "projects/global-it-310709/locations/europe-west4/transferConfigs/60777236-0000-234a-ad77-f4030436fb10",
+		Parent: parent,
 		Time:   &tmp,
 	}
 	resp, err := client.StartManualTransferRuns(ctx, req)
