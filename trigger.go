@@ -134,6 +134,7 @@ func StartManualTransfer(projectId string) error {
 	if err != nil {
 		return err
 	}
+	log.Printf(resp.String())
 
 	return nil
 }
